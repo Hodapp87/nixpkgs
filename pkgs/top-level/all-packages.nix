@@ -4031,6 +4031,8 @@ in
 
   ttylog = callPackage ../tools/misc/ttylog { };
 
+  turtl-desktop = callPackage ../applications/office/turtl-desktop { };
+  
   twitterBootstrap = callPackage ../development/web/twitter-bootstrap {};
   twitterBootstrap3 = callPackage ../development/web/twitter-bootstrap/v3.nix {};
 
