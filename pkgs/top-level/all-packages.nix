@@ -9611,6 +9611,10 @@ with pkgs;
     inherit (darwin.apple_sdk.frameworks) AVFoundation Cocoa QTKit;
   };
 
+  opencv33rc = callPackage ../development/libraries/opencv/3-3-rc.nix {
+    inherit (darwin.apple_sdk.frameworks) AVFoundation Cocoa QTKit;
+  };
+
   # this ctl version is needed by openexr_viewers
   openexr_ctl = ctl;
 
