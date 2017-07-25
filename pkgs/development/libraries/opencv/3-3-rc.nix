@@ -72,6 +72,15 @@ stdenv.mkDerivation rec {
       # This fixes the build on OS X.
       #patch -d "$NIX_BUILD_TOP/opencv_contrib" -p2 < "${contribOSXFix}"
 
+      # This is a hack to try to make this build work.  The below is
+      # responsible for putting the files from vggFiles/bootdescFiles
+      # in an appropriate place so that it does not try to download
+      # them (which it cannot do because network access is disabled
+      # during configure), and for whatever reason, it is no longer
+      # working.
+      sed -i -e "s/ocv_module_disable/#ocv_module_disable/g" "$NIX_BUILD_TOP/opencv_contrib/xfeatures2d/CMakeLists.txt"
+      cat "$NIX_BUILD_TOP/opencv_contrib/xfeatures2d/CMakeLists.txt"
+
       for name in vgg_generated_48.i \
                   vgg_generated_64.i \
                   vgg_generated_80.i \
