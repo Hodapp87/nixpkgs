@@ -2074,9 +2074,11 @@ in {
     name = "html5lib-${version}";
     buildInputs = with self; [ nose flake8 ];
     propagatedBuildInputs = with self; [ six ];
-    checkPhase = ''
-      nosetests
-    '';
+    #checkPhase = ''
+    #  nosetests
+    #'';
+
+    doCheck = false;
 
     version = "0.9999999";
     src = pkgs.fetchurl {
@@ -2101,6 +2103,40 @@ in {
 
     buildInputs = with self; [ pytest pytestrunner ];
     propagatedBuildInputs = with self; [ six html5lib ];
+
+    meta = {
+      description = "An easy, HTML5, whitelisting HTML sanitizer";
+      longDescription = ''
+        Bleach is an HTML sanitizing library that escapes or strips markup and
+        attributes based on a white list. Bleach can also linkify text safely,
+        applying filters that Django's urlize filter cannot, and optionally
+        setting rel attributes, even on links already in the text.
+
+        Bleach is intended for sanitizing text from untrusted sources. If you
+        find yourself jumping through hoops to allow your site administrators
+        to do lots of things, you're probably outside the use cases. Either
+        trust those users, or don't.
+      '';
+      homepage = https://github.com/mozilla/bleach;
+      downloadPage = https://github.com/mozilla/bleach/releases;
+      license = licenses.asl20;
+      maintainers = with maintainers; [ prikhi ];
+    };
+  };
+
+  # TODO, CMH: Factor this into one parametrized definition
+  bleach_150 = buildPythonPackage rec {
+    pname = "bleach";
+    version = "1.5.0";
+    name = "${pname}-${version}";
+
+    src = pkgs.fetchurl {
+      url = "mirror://pypi/${builtins.substring 0 1 pname}/${pname}/${name}.tar.gz";
+      sha256 = "0rdwb3piwwl30wfqg4ywm07276w7090xfq71lb5d6k5mk62pb3lp";
+    };
+
+    buildInputs = with self; [ pytest_303 pytestrunner ];
+    propagatedBuildInputs = with self; [ six html5lib_0_9999999 ];
 
     meta = {
       description = "An easy, HTML5, whitelisting HTML sanitizer";
@@ -4144,6 +4180,8 @@ in {
       pytest = null;
     };
   };
+
+  pytest_303 = callPackage ../development/python-modules/pytest/3_0_3.nix {};
 
   pytest-httpbin = callPackage ../development/python-modules/pytest-httpbin { };
 
@@ -12438,12 +12476,12 @@ in {
   };
 
   markdown = buildPythonPackage rec {
-    version = "2.6.7";
+    version = "2.6.8";
     name = "markdown-${version}";
 
     src = pkgs.fetchurl {
       url = "mirror://pypi/M/Markdown/Markdown-${version}.tar.gz";
-      sha256 = "1h055llfd0ps0ig7qb3v1j9068xv90dc9s7xkhkgz9zg8r4g5sys";
+      sha256 = "0cqfhr1km2s5d8jm6hbwgkrrj9hvkjf2gab3s2axlrw1clgaij0a";
     };
 
     # error: invalid command 'test'
@@ -17064,6 +17102,12 @@ in {
   });
 
   protobuf = self.protobuf2_6;
+  # only required by tensorflow
+  protobuf3_3 = callPackage ../development/python-modules/protobuf.nix {
+    disabled = isPyPy;
+    doCheck = !isPy3k;
+    protobuf = pkgs.protobuf3_3;
+  };
   # only required by tensorflow
   protobuf3_2 = callPackage ../development/python-modules/protobuf.nix {
     disabled = isPyPy;
@@ -28068,6 +28112,20 @@ EOF
     cudnn = pkgs.cudnn51_cudatoolkit80;
   };
 
+  tensorflow13WithoutCuda = callPackage ../development/python-modules/tensorflow/1.3.nix { };
+
+  tensorflow13WithCuda = callPackage ../development/python-modules/tensorflow/1.3.nix {
+    cudaSupport = true;
+    cudatoolkit = pkgs.cudatoolkit8;
+    cudnn = pkgs.cudnn6_cudatoolkit80;
+  };
+  
+  tensorflow_tensorboard = callPackage ../development/python-modules/tensorflow_tensorboard { };
+
+  tensorflow_object_detection = callPackage ../development/python-modules/tensorflow_object_detection { };
+
+  tf_slim = callPackage ../development/python-modules/tf_slim { };
+    
   tflearn = buildPythonPackage rec {
     name = "tflearn-0.2.1";
 
