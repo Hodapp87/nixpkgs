@@ -25134,6 +25134,10 @@ EOF
     cudaSupport = true;
   };
 
+  tensorflow_object_detection = callPackage ../development/python-modules/tensorflow_object_detection { };
+
+  tf_slim = callPackage ../development/python-modules/tf_slim { };
+    
   tflearn = buildPythonPackage rec {
     name = "tflearn-0.2.1";
 
