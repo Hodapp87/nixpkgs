@@ -1937,6 +1937,8 @@ with pkgs;
 
   curlftpfs = callPackage ../tools/filesystems/curlftpfs { };
 
+  curv = callPackage ../tools/graphics/curv { };
+
   cutter = callPackage ../tools/networking/cutter { };
 
   cwebbin = callPackage ../development/tools/misc/cwebbin { };
