@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, icu, expat, zlib, bzip2, python, fixDarwinDylibNames, libiconv
+{ stdenv, fetchurl, icu, expat, zlib, bzip2, python, python3, fixDarwinDylibNames, libiconv
 , which
 , buildPackages, buildPlatform, hostPlatform
 , toolset ? /**/ if stdenv.cc.isClang  then "clang"
@@ -10,6 +10,7 @@
 , enableShared ? !(hostPlatform.libc == "msvcrt") # problems for now
 , enableStatic ? !enableShared
 , enablePython ? false
+, enablePython3 ? false
 , enableNumpy ? false
 , taggedLayout ? ((enableRelease && enableDebug) || (enableSingleThreaded && enableMultiThreaded) || (enableShared && enableStatic))
 , patches ? []
@@ -20,11 +21,20 @@
 , ...
 }:
 
+# 2018-07-18 CMH
+# see: https://www.boost.org/doc/libs/1_67_0/libs/python/doc/html/building/configuring_boost_build.html
+# It does use user-config.jam below
+
+# Do I need with-python in configureFlags? Can I do multiple versions
+# here?  It doesn't even try to look for multiple versions; it just
+# seems to take whatever is last
+
 # We must build at least one type of libraries
 assert enableShared || enableStatic;
 
 # Python isn't supported when cross-compiling
 assert enablePython -> hostPlatform == buildPlatform;
+assert enablePython3 -> hostPlatform == buildPlatform;
 assert enableNumpy -> enablePython;
 
 with stdenv.lib;
@@ -118,6 +128,16 @@ stdenv.mkDerivation {
     using gcc : cross : ${stdenv.cc.targetPrefix}c++ ;
     EOF
   '';
+  # Doesn't work anyway:
+  #+ optionalString enablePython ''
+  #  cat << EOF >> user-config.jam
+  #  using python:  ${python.pythonVersion} : ${python.interpreter} ;
+  #  EOF
+  #'' + optionalString enablePython3 ''
+  #  cat << EOF >> user-config.jam
+  #  using python: ${python3.pythonVersion} : ${python3.interpreter} ;
+  #  EOF
+  #'';
 
   NIX_CFLAGS_LINK = stdenv.lib.optionalString stdenv.isDarwin
                       "-headerpad_max_install_names";
@@ -129,6 +149,7 @@ stdenv.mkDerivation {
     ++ optional (hostPlatform == buildPlatform) icu
     ++ optional stdenv.isDarwin fixDarwinDylibNames
     ++ optional enablePython python
+    ++ optional enablePython3 python3
     ++ optional enableNumpy python.pkgs.numpy;
 
   configureScript = "./bootstrap.sh";
@@ -142,7 +163,13 @@ stdenv.mkDerivation {
 
   buildPhase = ''
     ./b2 ${b2Args}
+  '' + optionalString enablePython3 ''
+    ./b2 ${b2Args} install
+    ./bootstrap.sh --includedir=$dev/include --libdir=$out/lib --with-python=${python3.interpreter} --with-icu=${icu.dev}
+    ./b2 ${b2Args}
   '';
+  # TODO properly handle optionals here
+  # TODO fix the fact that the b2 install is needed after the first build
 
   installPhase = ''
     # boostbook is needed by some applications
