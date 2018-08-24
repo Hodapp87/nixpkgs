@@ -2316,6 +2316,7 @@ with pkgs;
   );
 
   embree2 = callPackage ../development/libraries/embree/2.x.nix { };
+  embree3 = callPackage ../development/libraries/embree/3.x.nix { };
 
   emem = callPackage ../applications/misc/emem { };
 
