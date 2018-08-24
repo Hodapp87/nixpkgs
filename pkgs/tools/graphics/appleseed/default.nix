@@ -1,31 +1,26 @@
 { stdenv, fetchFromGitHub, cmake, boost165, pkgconfig, guile,
 eigen3_3, libpng, python, python3, libGLU, qt4, openexr, openimageio,
-opencolorio, xercesc, ilmbase, osl, seexpr,
-cmakeCurses
+opencolorio, xercesc, ilmbase, osl, seexpr, embree3
 }:
+
+# TODO: Make Embree optional
 
 let boost_static = boost165.override { enableStatic = true; enablePython = true; enablePython3 = true; };
 in stdenv.mkDerivation rec {
-  # This needs Boost compiled with two versions of Python.  I don't
-  # believe I can sanely do this with overrides of Nixpkgs' existing
-  # boost, so this may require a custom version of it also in Nixpkgs.
-  # See:
-  # https://www.boost.org/doc/libs/1_67_0/libs/python/doc/html/building/configuring_boost_build.html
-  # If I didn't pass enablePython = true to boost, how was this ever building right?
 
   name = "appleseed-${version}";
-  version = "1.9.0-beta";
+  version = "master";
 
   src = fetchFromGitHub {
     owner  = "appleseedhq";
     repo   = "appleseed";
-    rev    = "1.9.0-beta";
-    sha256 = "0m7zvfkdjfn48zzaxh2wa1bsaj4l876a05bzgmjlfq5dz3202anr";
+    rev    = "471b49af45e16767159f06f2d533620d47820650";
+    sha256 = "0rgyg52sa0kq4sdpvpgl0cn823h9lmhwxdy2cdbd7x8ys8lnps79";
   };
   buildInputs = [
     cmake pkgconfig boost_static guile eigen3_3 libpng python python3
     libGLU qt4 openexr openimageio opencolorio xercesc
-    osl seexpr  cmakeCurses
+    embree3 osl seexpr
   ];
 
   NIX_CFLAGS_COMPILE = "-I${openexr.dev}/include/OpenEXR -I${ilmbase.dev}/include/OpenEXR -I${openimageio.dev}/include/OpenImageIO";
@@ -35,15 +30,12 @@ in stdenv.mkDerivation rec {
       "-DUSE_EXTERNAL_OSL=ON" "-DWITH_CLI=ON" "-DWITH_STUDIO=ON" "-DWITH_TOOLS=ON"
       "-DUSE_EXTERNAL_PNG=ON" "-DUSE_EXTERNAL_ZLIB=ON"
       "-DUSE_EXTERNAL_EXR=ON" "-DUSE_EXTERNAL_SEEXPR=ON"
-<<<<<<< HEAD
-      "-DWITH_PYTHON=ON"
-=======
+      "-DUSE_EXTERNAL_EMBREE=ON"
       "-DWITH_PYTHON2_BINDINGS=ON"
       # N.B. Blenderseed requires Python 3.x bindings.
       "-DWITH_PYTHON3_BINDINGS=ON"
-      # but a8f57fb049ef1de391e77b3c8118ea39b1d4b88e added this
-      # support, and that's not in 1.9.0-beta
->>>>>>> Added some scratch work. Appleseed version still too old for Py 3.x bindings
+      "-DBOOST_PYTHON3_LIBRARY=${boost_static}/lib/libboost_python3-mt.so"
+      "-DPYTHON3_INCLUDE_DIR=${python3}/include/python${python3.majorVersion}"
       "-DWITH_DISNEY_MATERIAL=ON"
       "-DUSE_SSE=ON"
       "-DUSE_SSE42=ON"
