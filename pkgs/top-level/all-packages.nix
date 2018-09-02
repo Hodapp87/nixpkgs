@@ -1566,6 +1566,7 @@ with pkgs;
   apparix = callPackage ../tools/misc/apparix { };
 
   appleseed = callPackage ../tools/graphics/appleseed { };
+  appleseed-plugins = callPackage ../tools/graphics/appleseed/plugins.nix { };
 
   arping = callPackage ../tools/networking/arping { };
 
