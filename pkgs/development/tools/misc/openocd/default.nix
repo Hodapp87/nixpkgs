@@ -1,15 +1,19 @@
-{ stdenv, fetchurl, libftdi, libusb1, pkgconfig, hidapi }:
+{ stdenv, fetchFromGitHub, libftdi, libusb1, pkgconfig, hidapi,
+  autoconf, automake, libtool, which }:
 
 stdenv.mkDerivation rec {
   name = "openocd-${version}";
-  version = "0.10.0";
+  version = "esp32-1821e343";
 
-  src = fetchurl {
-    url = "mirror://sourceforge/openocd/openocd-${version}.tar.bz2";
-    sha256 = "1bhn2c85rdz4gf23358kg050xlzh7yxbbwmqp24c0akmh3bff4kk";
+  src = fetchFromGitHub {
+    owner = "espressif";
+    repo = "openocd-esp32";
+    rev = "1821e343afd655c6737e8fdc6dfc0eeebbb38026";
+    sha256 = "0baqfprk1027549pj9xjj44930vhnzsxi5sbgl9x03zasdc6f7vn";
+    fetchSubmodules = true;
   };
 
-  nativeBuildInputs = [ pkgconfig ];
+  nativeBuildInputs = [ pkgconfig autoconf automake libtool which ];
   buildInputs = [ libftdi libusb1 hidapi ];
 
   configureFlags = [
@@ -24,6 +28,10 @@ stdenv.mkDerivation rec {
     "--enable-sysfsgpio"
     "--enable-remote-bitbang"
   ];
+  
+  preConfigure = ''
+    SKIP_SUBMODULE=1 ./bootstrap
+  '';
 
   NIX_CFLAGS_COMPILE = [
     "-Wno-implicit-fallthrough"

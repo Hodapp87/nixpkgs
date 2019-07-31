@@ -1160,6 +1160,8 @@ with pkgs;
 
   esptool-ck = callPackage ../tools/misc/esptool-ck { };
 
+  espressif-sdk = callPackage ../development/compilers/espressif-sdk { };
+
   ephemeralpg = callPackage ../applications/misc/ephemeralpg {};
 
   et = callPackage ../applications/misc/et {};
