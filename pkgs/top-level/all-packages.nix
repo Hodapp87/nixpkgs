@@ -1395,6 +1395,8 @@ in
 
   esphome = callPackage ../servers/home-assistant/esphome.nix { };
 
+  espressif-sdk = callPackage ../development/compilers/espressif-sdk { };
+
   esptool = callPackage ../tools/misc/esptool { };
 
   esptool-ck = callPackage ../tools/misc/esptool-ck { };
